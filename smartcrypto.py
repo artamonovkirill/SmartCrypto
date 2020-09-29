@@ -12,7 +12,7 @@ import websocket
 UserId = "654321"
 AppId = "12345"
 deviceId =  "7e509404-9d7c-46b4-8f6a-e2a9668ad184"
-tvIP = "192.168.xxx.xxx"
+tvIP = "192.168.1.18"
 tvPort = "8080"
 
 lastRequestId = 0
