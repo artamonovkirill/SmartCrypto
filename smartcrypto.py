@@ -16,15 +16,20 @@ tvIP = "192.168.1.18"
 tvPort = "8080"
 
 lastRequestId = 0
+
+
 def getFullUrl(urlPath):
     global tvIP, tvPort
     return "http://"+tvIP+":"+tvPort+urlPath
 
+
 def GetFullRequestUri(step, appId, deviceId):
     return getFullUrl("/ws/pairing?step="+str(step)+"&app_id="+appId+"&device_id="+deviceId)
 
+
 def ShowPinPageOnTv():
     requests.post(getFullUrl("/ws/apps/CloudPINPage"), "pin4")
+
 
 def CheckPinPageOnTv():
     full_url = getFullUrl("/ws/apps/CloudPINPage")
@@ -37,10 +42,12 @@ def CheckPinPageOnTv():
             return True
     return False
 
+
 def FirstStepOfPairing():
     global AppId, deviceId;
     firstStepURL = GetFullRequestUri(0,AppId, deviceId)+"&type=1"
     firstStepResponse = requests.get(firstStepURL).text
+
 
 def StartPairing():
     global lastRequestId
@@ -49,7 +56,9 @@ def StartPairing():
         print("Pin NOT on TV")
         ShowPinPageOnTv()
     else:
-        print("Pin ON TV");
+        print("Pin ON TV")
+
+
 def HelloExchange(pin):
     global AppId, deviceId, lastRequestId, UserId
     hello_output = crypto.generateServerHello(UserId,pin)
@@ -67,8 +76,9 @@ def HelloExchange(pin):
     lastRequestId = int(requestId)
     return crypto.parseClientHello(clientHello, hello_output['hash'], hello_output['AES_key'], UserId)
 
+
 def AcknowledgeExchange(SKPrime):
-    global lastRequestId, AppId,  deviceId;
+    global lastRequestId, AppId,  deviceId
     serverAckMessage = crypto.generateServerAcknowledge(SKPrime)
     content="{\"auth_Data\":{\"auth_type\":\"SPC\",\"request_id\":\"" + str(lastRequestId) + "\",\"ServerAckMsg\":\"" + serverAckMessage + "\"}}"
     thirdStepURL = GetFullRequestUri(2, AppId, deviceId)
@@ -78,7 +88,7 @@ def AcknowledgeExchange(SKPrime):
         sys.exit(-1)
     output = re.search('ClientAckMsg.*?:.*?(\d[0-9a-zA-Z]*).*?session_id.*?(\d)', thirdStepResponse, flags=re.IGNORECASE)
     if output is None:
-        print("Unable to get session_id and/or ClientAckMsg!!!");
+        print("Unable to get session_id and/or ClientAckMsg!!!")
         sys.exit(-1)
     clientAck = output.group(1)
     if not crypto.parseClientAcknowledge(clientAck, SKPrime):
@@ -87,10 +97,13 @@ def AcknowledgeExchange(SKPrime):
     sessionId=output.group(2)
     print("sessionId: "+sessionId)
     return sessionId
+
+
 def ClosePinPageOnTv():
-    full_url = getFullUrl("/ws/apps/CloudPINPage/run");
+    full_url = getFullUrl("/ws/apps/CloudPINPage/run")
     requests.delete(full_url)
     return False
+
 
 def send_command(session_id, ctx, key_command):
     ctx = ctx.upper()
@@ -135,10 +148,12 @@ if (True):
     print("SessionID: " + str(currentSessionId))
 
     ClosePinPageOnTv()
-    print("Authorization successfull :)\n")
+    print("Authorization successful :)\n")
 else:
     currentSessionId = 0 #copied sessionId from previous connection
     ctx = '' #copied ctf from previous connection
+
+
 def control(command):
     print(command)
     send_command(currentSessionId, ctx, command)
